@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 
-import QuestionGrid from "../components/QBank/QuestionGrid"
+import QuestionGrid from "../components/Qbank/QuestionGrid"
 
 import { ArrowLeft } from "lucide-react"
 import instance from "../utils/axios.js"
