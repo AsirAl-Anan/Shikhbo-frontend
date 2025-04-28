@@ -23,7 +23,7 @@ export default function AuthPage() {
     // Redirect if user is signed in and email is verified
     if (currentUser && firebaseUser?.emailVerified) {
       setIsPageLoading(true) // Show loading state during redirect
-     navigate("/")
+      window.location.href = ("/")
     } else {
       setIsPageLoading(false) // Ensure loading is false on normal render
     }

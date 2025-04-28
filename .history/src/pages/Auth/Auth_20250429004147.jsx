@@ -12,7 +12,7 @@ import { NavLink } from "react-router-dom"
 import { AuthContext } from "../../context/UserContext"
 import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
-
+import use
 export default function AuthPage() {
   const [activeTab, setActiveTab] = useState("signin") // "signin" or "signup"
   const [isPageLoading, setIsPageLoading] = useState(false) // Add a page loading state
@@ -23,7 +23,7 @@ export default function AuthPage() {
     // Redirect if user is signed in and email is verified
     if (currentUser && firebaseUser?.emailVerified) {
       setIsPageLoading(true) // Show loading state during redirect
-     navigate("/")
+      window.location.href = ("/")
     } else {
       setIsPageLoading(false) // Ensure loading is false on normal render
     }
