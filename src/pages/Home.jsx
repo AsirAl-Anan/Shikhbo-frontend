@@ -2,10 +2,9 @@
 
 import { useState, useEffect, useRef } from "react"
 import { Outlet } from "react-router-dom"
-import Header from "../components/Layout/Header"
-import Sidebar from "../components/Layout/Sidebar"
-import ChatInput from "../components/Chat/ChatInput"
-import ChatModal from "../components/Chat/ChatModal"
+import Header from "../components/layout/Header"
+import Sidebar from "../components/layout/Sidebar"
+
 import { useContext } from "react"
 import { AuthContext } from "../context/UserContext"
 
