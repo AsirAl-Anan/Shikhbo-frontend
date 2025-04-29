@@ -211,15 +211,11 @@ function NewChatPage() {
       setChatId(chatId);
       setChatName(chatName); // Store the chat name
       
-      // Replace all messages with content from server if we had an optimistic message
-      if (optimisticMessageSent.current) {
+      // For new chats only, replace all messages with content from server
+      if (!paramChatId) {
         setMessages(newMessages);
         messagesRef.current = newMessages; // Update ref
         optimisticMessageSent.current = false; // Reset flag
-      } else {
-        // Otherwise append new messages
-        setMessages(newMessages);
-        messagesRef.current = newMessages; // Update ref
       }
       
       // Clear image selection after message is sent
@@ -245,27 +241,50 @@ function NewChatPage() {
         console.log("Updated chat name:", receivedChatName);
       }
       
-      // If we had an optimistic message and we're getting the backend response
-      if (optimisticMessageSent.current) {
+      if (receivedChatId && receivedChatId === paramChatId) {
+        // We're in an existing chat with a specific ID - need to preserve history
+        // First check if the latest message in receivedMessages already exists in our local state
+        const latestServerMessage = receivedMessages[receivedMessages.length - 1];
+        const latestMsgExists = messagesRef.current.some(
+          existingMsg => (existingMsg._id === latestServerMessage._id) || 
+                         (existingMsg.id === latestServerMessage._id) ||
+                         (existingMsg._id === latestServerMessage.id)
+        );
+        
+        if (!latestMsgExists && optimisticMessageSent.current) {
+          // This is a response to our optimistic message - we need to replace the optimistic message
+          // Remove the optimistic message (it should be the last one in our array)
+          const allButLastMessage = messagesRef.current.slice(0, -1);
+          
+          // Create new array with all previous messages plus the new server message
+          const newMessages = [...allButLastMessage, latestServerMessage]; 
+          
+          // Update both state and ref
+          setMessages(newMessages);
+          messagesRef.current = newMessages;
+          optimisticMessageSent.current = false; // Reset flag
+        } else {
+          // Otherwise, just add any new messages that don't exist yet
+          const newMessages = [...messagesRef.current];
+          receivedMessages.forEach(receivedMsg => {
+            const msgExists = newMessages.some(
+              existingMsg => (existingMsg._id || existingMsg.id) === (receivedMsg._id || receivedMsg.id)
+            );
+            
+            if (!msgExists) {
+              newMessages.push(receivedMsg);
+            }
+          });
+          
+          // Update both state and ref
+          setMessages(newMessages);
+          messagesRef.current = newMessages;
+        }
+      } else if (optimisticMessageSent.current && !paramChatId) {
+        // This is a new chat we just created - replace all messages
         setMessages(receivedMessages);
         messagesRef.current = receivedMessages;
         optimisticMessageSent.current = false; // Reset flag
-      } else if (receivedChatId && receivedChatId === paramChatId) {
-        // We're in an existing chat - need to preserve history
-        const newMessages = [...messagesRef.current];
-        receivedMessages.forEach(receivedMsg => {
-          const msgExists = newMessages.some(
-            existingMsg => (existingMsg._id || existingMsg.id) === (receivedMsg._id || receivedMsg.id)
-          );
-          
-          if (!msgExists) {
-            newMessages.push(receivedMsg);
-          }
-        });
-        
-        // Update both state and ref
-        setMessages(newMessages);
-        messagesRef.current = newMessages;
       } else {
         // New chat or different chat - use the full set of messages
         setMessages(receivedMessages);
