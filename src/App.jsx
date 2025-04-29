@@ -1,8 +1,7 @@
+import { Helmet } from 'react-helmet';
 import { useContext } from 'react';
-import { useEffect, useState } from 'react';
-import './index.css';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import { HelmetProvider, Helmet } from 'react-helmet-async';
+import './index.css';
 
 import AuthPage from './pages/Auth/Auth';
 import HomePage from './pages/Home';
@@ -17,7 +16,7 @@ import AdminLayout from './pages/Admin/AdminLayout';
 import Dashboard from './pages/Admin/AdminDashboard';
 import AddQuestion from './pages/Admin/AddQuestion';
 import AddSubject from './pages/Admin/AddSubject';
-import AcademicSection from './components/QBank/Subjects'; 
+import AcademicSection from './components/QBank/Subjects';
 
 function App() {
   const { currentUser } = useContext(AuthContext);
@@ -51,7 +50,7 @@ function App() {
   ]);
 
   return (
-    <HelmetProvider>
+    <>
       <Helmet>
         <title>Shikhbo - learn anything</title>
       </Helmet>
@@ -59,7 +58,7 @@ function App() {
       <div className="bg-gray-950 text-gray-100">
         <RouterProvider router={router} />
       </div>
-    </HelmetProvider>
+    </>
   );
 }
 
