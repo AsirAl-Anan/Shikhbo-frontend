@@ -16,12 +16,7 @@ export function ChatMessage({ message }) {
         
         return (
           <div key={msg._id || msg.id || index} className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
-            <div className={`max-w-[80%] ${isUser ? "order-2" : "order-1"}`}>
-              {!isUser && (
-                <div className="h-8 w-8 rounded-full bg-gray-600 flex items-center justify-center mb-2">
-                  <span className="text-xs">AI</span>
-                </div>
-              )}
+            <div className={`max-w-[80%]`}>
               <div className={`rounded-lg p-3 ${isUser ? "bg-gray-700" : "bg-gray-800"}`}>
                 <p className="whitespace-pre-wrap">{messageText}</p>
                 {msg.image && (
@@ -32,11 +27,6 @@ export function ChatMessage({ message }) {
                   />
                 )}
               </div>
-              {isUser && (
-                <div className="h-8 w-8 rounded-full bg-gray-600 flex items-center justify-center mt-2 ml-auto">
-                  <span className="text-xs">You</span>
-                </div>
-              )}
             </div>
           </div>
         );
