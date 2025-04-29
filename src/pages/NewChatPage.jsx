@@ -28,6 +28,7 @@ function NewChatPage() {
   const location = useLocation();
   const pendingQueryProcessed = useRef(false);
   const fileInputRef = useRef(null);
+  const optimisticMessageSent = useRef(false); // Track if an optimistic message was sent
   
   // Keep a reference to the full message history
   const messagesRef = useRef([]);
@@ -44,6 +45,7 @@ function NewChatPage() {
       
       if (pendingQuery && isPending && socketRef.current && socketRef.current.connected) {
         pendingQueryProcessed.current = true; // Mark as processed to prevent duplicate submissions
+        optimisticMessageSent.current = true; // Mark that we've sent an optimistic message
         
         // Submit the query directly without showing in input field
         submitQueryDirectly(pendingQuery);
@@ -97,6 +99,7 @@ function NewChatPage() {
         setChatName(null); // Reset chat name
         setShouldNavigate(false);
         pendingQueryProcessed.current = false;
+        optimisticMessageSent.current = false; // Reset optimistic message flag
         setSelectedImage(null);
         setImagePreview(null);
       }
@@ -128,6 +131,7 @@ function NewChatPage() {
           localStorage.removeItem('chatModalQuery');
           localStorage.removeItem('chatModalPending');
           pendingQueryProcessed.current = false;
+          optimisticMessageSent.current = false; // Reset optimistic message flag
           setSelectedImage(null);
           setImagePreview(null);
         } catch (error) {
@@ -178,6 +182,7 @@ function NewChatPage() {
         
         if (pendingQuery && isPending) {
           pendingQueryProcessed.current = true;
+          optimisticMessageSent.current = true; // Mark that we've sent an optimistic message
           
           // Submit the query directly
           submitQueryDirectly(pendingQuery);
@@ -206,9 +211,16 @@ function NewChatPage() {
       setChatId(chatId);
       setChatName(chatName); // Store the chat name
       
-      // Update messages with content from server
-      setMessages(newMessages);
-      messagesRef.current = newMessages; // Update ref
+      // Replace all messages with content from server if we had an optimistic message
+      if (optimisticMessageSent.current) {
+        setMessages(newMessages);
+        messagesRef.current = newMessages; // Update ref
+        optimisticMessageSent.current = false; // Reset flag
+      } else {
+        // Otherwise append new messages
+        setMessages(newMessages);
+        messagesRef.current = newMessages; // Update ref
+      }
       
       // Clear image selection after message is sent
       setSelectedImage(null);
@@ -233,7 +245,12 @@ function NewChatPage() {
         console.log("Updated chat name:", receivedChatName);
       }
       
-      if (receivedChatId && receivedChatId === paramChatId) {
+      // If we had an optimistic message and we're getting the backend response
+      if (optimisticMessageSent.current) {
+        setMessages(receivedMessages);
+        messagesRef.current = receivedMessages;
+        optimisticMessageSent.current = false; // Reset flag
+      } else if (receivedChatId && receivedChatId === paramChatId) {
         // We're in an existing chat - need to preserve history
         const newMessages = [...messagesRef.current];
         receivedMessages.forEach(receivedMsg => {
@@ -300,6 +317,7 @@ function NewChatPage() {
     if (!inputValue.trim() && !selectedImage) return;
   
     setIsTyping(true);
+    optimisticMessageSent.current = true; // Set flag for optimistic update
   
     // Create a consistent message structure that matches what the server will return
     const newUserMessage = {
@@ -355,6 +373,7 @@ function NewChatPage() {
     } catch (error) {
       console.error("Error uploading image or sending message:", error);
       setIsTyping(false);
+      optimisticMessageSent.current = false; // Reset flag on error
     }
     
     setInputValue("");
@@ -388,10 +407,7 @@ function NewChatPage() {
               ))}
               {isTyping && (
                 <div className="flex items-center space-x-2">
-                  <div className="h-8 w-8 rounded-full bg-gray-600 flex items-center justify-center">
-                    <span className="text-xs">AI</span>
-                  </div>
-                  <div className="flex space-x-1">
+                  <div className="flex space-x-1 ml-3">
                     <div className="h-2 w-2 bg-gray-400 rounded-full animate-bounce"></div>
                     <div
                       className="h-2 w-2 bg-gray-400 rounded-full animate-bounce"
