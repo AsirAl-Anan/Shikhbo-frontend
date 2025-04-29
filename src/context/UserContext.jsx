@@ -53,7 +53,7 @@ const AuthProvider = ({ children }) => {
       
       try {
         
-        const dbResponse = await axios.post('/users/signup', userData);
+        const dbResponse = await axios.post('/users/signup', userData, {withCredentials: true});
         
         if (dbResponse.status === 201 || dbResponse.status === 200) {
           // Successfully saved to database
