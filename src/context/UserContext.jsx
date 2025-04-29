@@ -52,6 +52,7 @@ const AuthProvider = ({ children }) => {
       };
       
       try {
+        
         const dbResponse = await axios.post('/users/signup', userData);
         
         if (dbResponse.status === 201 || dbResponse.status === 200) {
@@ -139,7 +140,7 @@ const AuthProvider = ({ children }) => {
       
       // Check if user exists in our database
       try {
-        const checkUser = await axios.get(`/users/${user.email}`);
+        const checkUser = await axios.get(`/users/${user.email}`, { withCredentials: true });
         
         if (checkUser.status === 200) {
           // User exists, just set as current user
@@ -149,7 +150,7 @@ const AuthProvider = ({ children }) => {
       } catch (checkErr) {
         // User doesn't exist in database, create them
         try {
-          const dbResponse = await axios.post('/users/signup', userData);
+          const dbResponse = await axios.post('/users/signup', userData, { withCredentials: true });
           console.log("MongoDB user data:", dbResponse);
           if (dbResponse.status === 201 || dbResponse.status === 200) {
             
@@ -222,7 +223,7 @@ const AuthProvider = ({ children }) => {
   // Fetch user data from MongoDB using email
   const fetchUserData = async (email) => {
     try {
-      const response = await axios.get(`/users/${email}`);
+      const response = await axios.get(`/users/${email}`, { withCredentials: true });
       console.log("MongoDB user data:", response);
       if (response.status === 200) {
         return response.data;
