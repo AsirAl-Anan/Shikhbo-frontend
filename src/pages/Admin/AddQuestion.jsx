@@ -86,8 +86,8 @@ const AddQuestion = () => {
       newErrors.stem = 'Stem is required';
     }
     
-    // Validate options
-    ['a', 'b', 'c', 'd'].forEach(option => {
+    // Validate options A, B, and C (excluding D)
+    ['a', 'b', 'c'].forEach(option => {
       if (!formData[option].question.trim()) {
         newErrors[`${option}.question`] = `Option ${option.toUpperCase()} question is required`;
       }
@@ -174,7 +174,7 @@ const AddQuestion = () => {
         </div>
 
         {/* Option fields */}
-        {['a', 'b', 'c', 'd'].map((option) => (
+        {['a', 'b', 'c'].map((option) => (
           <div key={option} className="mb-6 border border-gray-700 rounded-md p-4">
             <h3 className="text-lg font-medium mb-4">Option {option.toUpperCase()}</h3>
             
@@ -215,6 +215,37 @@ const AddQuestion = () => {
             </div>
           </div>
         ))}
+        
+        {/* Option D - Not required */}
+        <div className="mb-6 border border-gray-700 rounded-md p-4">
+          <h3 className="text-lg font-medium mb-4">Option D</h3>
+          
+          <div className="mb-4">
+            <label className="block text-gray-300 mb-2" htmlFor="d-question">
+              Question
+            </label>
+            <input
+              type="text"
+              id="d-question"
+              value={formData.d.question}
+              onChange={(e) => handleOptionChange('d', 'question', e.target.value)}
+              className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+          </div>
+          
+          <div>
+            <label className="block text-gray-300 mb-2" htmlFor="d-answer">
+              Answer
+            </label>
+            <input
+              type="text"
+              id="d-answer"
+              value={formData.d.answer}
+              onChange={(e) => handleOptionChange('d', 'answer', e.target.value)}
+              className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+          </div>
+        </div>
 
         {/* Metadata fields */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
