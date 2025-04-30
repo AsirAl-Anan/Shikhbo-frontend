@@ -12,9 +12,7 @@ export default function QuestionGrid({ subjectName }) {
   const getQuestions = async () => {
     try {
       setLoading(true)
-      const res = await axios.get('/admin/cq', {
-        params: { subjectName }
-      })
+      const res = await axios.get(`/admin/cq/${subjectName}`)
       setQuestions(res.data || [])
     } catch (err) {
       console.error(err)
