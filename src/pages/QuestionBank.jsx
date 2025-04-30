@@ -3,15 +3,19 @@
 import { useState } from "react"
 
 import QuestionGrid from "../components/QBank/QuestionGrid"
+import { useParams } from 'react-router-dom';
 
 import { ArrowLeft } from "lucide-react"
 import instance from "../utils/axios.js"
 import { useEffect } from "react"
 const axios = instance
 import { useNavigate } from "react-router-dom"
+
+
 export default function StudyMaterialsPage() {
   const [isFilterOpen, setIsFilterOpen] = useState(false)
- 
+   const { id } = useParams();
+
  const navigate = useNavigate()
   const toggleFilter = () => {
     setIsFilterOpen(!isFilterOpen)
@@ -58,7 +62,7 @@ export default function StudyMaterialsPage() {
 
       <div className="">
         <div className="">
-          <QuestionGrid />
+          <QuestionGrid  subjectName={id}/>
         </div>
        
       </div>
