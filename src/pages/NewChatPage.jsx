@@ -52,7 +52,7 @@ function NewChatPage() {
         
         // Display optimistic user message immediately
         const newUserMessage = {
-          id: Date.now(),
+          id: Date.now().toString(), // Use string ID for better comparison
           content: pendingQuery,
           role: "user",
           chatId: null,
@@ -117,8 +117,16 @@ function NewChatPage() {
             { withCredentials: true }
           );
           console.log("Fetched chat data:", res.data);
-          setMessages(res.data.messages);
-          messagesRef.current = res.data.messages; // Store in ref for persistence
+          
+          // Ensure all message objects have consistent string IDs
+          const normalizedMessages = res.data.messages.map(msg => ({
+            ...msg,
+            id: msg._id || msg.id, // Ensure id exists for all messages
+            _id: msg._id || msg.id  // Ensure _id exists for all messages
+          }));
+          
+          setMessages(normalizedMessages);
+          messagesRef.current = normalizedMessages; // Store in ref for persistence
           setChatId(paramChatId);
           
           // Set chat name if it exists in the response
@@ -160,6 +168,23 @@ function NewChatPage() {
   console.log('messages', messages);
   console.log('chatName', chatName); // Log the chat name
   
+  // Check if a message already exists in the messages array
+  const messageExists = (messageToCheck, messagesArray) => {
+    return messagesArray.some(existingMsg => {
+      // Check message ID match
+      const idMatch = (existingMsg._id === messageToCheck._id) || 
+                     (existingMsg.id === messageToCheck._id) ||
+                     (existingMsg._id === messageToCheck.id) ||
+                     (existingMsg.id === messageToCheck.id);
+      
+      // Check content + timestamp match (alternative for optimistic messages)
+      const contentMatch = existingMsg.content === messageToCheck.content && 
+                          existingMsg.sender === messageToCheck.sender;
+      
+      return idMatch || contentMatch;
+    });
+  };
+  
   // Setup socket connection
   useEffect(() => {
     // Clean up any existing socket connection before creating a new one
@@ -189,7 +214,7 @@ function NewChatPage() {
           
           // Display optimistic user message immediately
           const newUserMessage = {
-            id: Date.now(),
+            id: Date.now().toString(), // Use string ID
             content: pendingQuery,
             role: "user",
             chatId: null,
@@ -211,11 +236,32 @@ function NewChatPage() {
       setChatId(chatId);
       setChatName(chatName); // Store the chat name
       
-      // For new chats only, replace all messages with content from server
+      // For new chats only, replace all messages with content from server,
+      // but avoid duplicate messages
       if (!paramChatId) {
-        setMessages(newMessages);
-        messagesRef.current = newMessages; // Update ref
-        optimisticMessageSent.current = false; // Reset flag
+        // Normalize messages to ensure consistent ID format
+        const normalizedMessages = newMessages.map(msg => ({
+          ...msg,
+          id: msg._id || msg.id, // Ensure id exists
+          _id: msg._id || msg.id  // Ensure _id exists
+        }));
+        
+        // Deduplicate messages from server against what we might already have
+        const uniqueMessages = normalizedMessages.filter(
+          serverMsg => !messageExists(serverMsg, messagesRef.current)
+        );
+        
+        // If optimistic message was sent, replace it with server messages
+        if (optimisticMessageSent.current) {
+          setMessages(normalizedMessages);
+          messagesRef.current = normalizedMessages;
+          optimisticMessageSent.current = false;
+        } else if (uniqueMessages.length > 0) {
+          // Only add unique messages
+          const updatedMessages = [...messagesRef.current, ...uniqueMessages];
+          setMessages(updatedMessages);
+          messagesRef.current = updatedMessages;
+        }
       }
       
       // Clear image selection after message is sent
@@ -228,7 +274,7 @@ function NewChatPage() {
       setIsTyping(false);
     });
   
-    // Modified messageReceived event handler
+    // Modified messageReceived event handler to handle deduplication
     socketRef.current.on("messageReceived", ({ chatId: receivedChatId, chatName: receivedChatName, messages: receivedMessages }) => {
       // Ensure we have a valid chatId from the response
       if (receivedChatId) {
@@ -241,54 +287,70 @@ function NewChatPage() {
         console.log("Updated chat name:", receivedChatName);
       }
       
+      // Ensure all received messages have consistent ID format
+      const normalizedReceivedMessages = receivedMessages.map(msg => ({
+        ...msg,
+        id: msg._id || msg.id,
+        _id: msg._id || msg.id
+      }));
+      
       if (receivedChatId && receivedChatId === paramChatId) {
-        // We're in an existing chat with a specific ID - need to preserve history
-        // First check if the latest message in receivedMessages already exists in our local state
-        const latestServerMessage = receivedMessages[receivedMessages.length - 1];
-        const latestMsgExists = messagesRef.current.some(
-          existingMsg => (existingMsg._id === latestServerMessage._id) || 
-                         (existingMsg.id === latestServerMessage._id) ||
-                         (existingMsg._id === latestServerMessage.id)
+        // For existing chats, we need to deduplicate carefully
+        // Find new messages that don't exist in our current state
+        const newUniqueMessages = normalizedReceivedMessages.filter(
+          serverMsg => !messageExists(serverMsg, messagesRef.current)
         );
         
-        if (!latestMsgExists && optimisticMessageSent.current) {
-          // This is a response to our optimistic message - we need to replace the optimistic message
-          // Remove the optimistic message (it should be the last one in our array)
-          const allButLastMessage = messagesRef.current.slice(0, -1);
+        // If optimistic message was sent, we need to handle updates carefully
+        if (optimisticMessageSent.current) {
+          // Find the optimistic message (last user message)
+          const optimisticMessageIndex = messagesRef.current.findIndex(
+            msg => msg.sender === "user" && !msg._id.includes('/') // Temporary ID doesn't contain '/'
+          );
           
-          // Create new array with all previous messages plus the new server message
-          const newMessages = [...allButLastMessage, latestServerMessage]; 
-          
-          // Update both state and ref
-          setMessages(newMessages);
-          messagesRef.current = newMessages;
-          optimisticMessageSent.current = false; // Reset flag
-        } else {
-          // Otherwise, just add any new messages that don't exist yet
-          const newMessages = [...messagesRef.current];
-          receivedMessages.forEach(receivedMsg => {
-            const msgExists = newMessages.some(
-              existingMsg => (existingMsg._id || existingMsg.id) === (receivedMsg._id || receivedMsg.id)
-            );
+          if (optimisticMessageIndex !== -1) {
+            // Remove the optimistic message and replace with server messages
+            const messagesWithoutOptimistic = [
+              ...messagesRef.current.slice(0, optimisticMessageIndex),
+              ...messagesRef.current.slice(optimisticMessageIndex + 1)
+            ];
             
-            if (!msgExists) {
-              newMessages.push(receivedMsg);
+            // Add new messages from server
+            const updatedMessages = [...messagesWithoutOptimistic, ...normalizedReceivedMessages];
+            setMessages(updatedMessages);
+            messagesRef.current = updatedMessages;
+          } else {
+            // Just add new unique messages
+            if (newUniqueMessages.length > 0) {
+              const updatedMessages = [...messagesRef.current, ...newUniqueMessages];
+              setMessages(updatedMessages);
+              messagesRef.current = updatedMessages;
             }
-          });
+          }
           
-          // Update both state and ref
-          setMessages(newMessages);
-          messagesRef.current = newMessages;
+          optimisticMessageSent.current = false;
+        } else if (newUniqueMessages.length > 0) {
+          // Just add new unique messages
+          const updatedMessages = [...messagesRef.current, ...newUniqueMessages];
+          setMessages(updatedMessages);
+          messagesRef.current = updatedMessages;
         }
       } else if (optimisticMessageSent.current && !paramChatId) {
         // This is a new chat we just created - replace all messages
-        setMessages(receivedMessages);
-        messagesRef.current = receivedMessages;
+        setMessages(normalizedReceivedMessages);
+        messagesRef.current = normalizedReceivedMessages;
         optimisticMessageSent.current = false; // Reset flag
       } else {
-        // New chat or different chat - use the full set of messages
-        setMessages(receivedMessages);
-        messagesRef.current = receivedMessages;
+        // New chat or different chat - carefully merge new messages
+        const newUniqueMessages = normalizedReceivedMessages.filter(
+          serverMsg => !messageExists(serverMsg, messagesRef.current)
+        );
+        
+        if (newUniqueMessages.length > 0) {
+          const updatedMessages = [...messagesRef.current, ...newUniqueMessages];
+          setMessages(updatedMessages);
+          messagesRef.current = updatedMessages;
+        }
       }
       
       // Clear image selection after message is sent
@@ -340,7 +402,8 @@ function NewChatPage() {
   
     // Create a consistent message structure that matches what the server will return
     const newUserMessage = {
-      id: Date.now(), // Temporary ID
+      id: `tmp_${Date.now()}`, // Temporary ID with prefix for easy identification
+      _id: `tmp_${Date.now()}`, // Add _id with the same value
       content: inputValue, // Keep content property for optimistic UI update
       text: inputValue,    // Add text property to match server response format
       role: "user",
