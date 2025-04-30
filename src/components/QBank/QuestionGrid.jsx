@@ -16,7 +16,7 @@ export default function QuestionGrid({ subjectName }) {
       setQuestions(res.data || [])
     } catch (err) {
       console.error(err)
-      setError("⚠️ Server error. Please try again later.")
+setError(`No question added for ${subjectName.charAt(0).toUpperCase() + subjectName.slice(1)}. Please stay tuned.`);
     } finally {
       setLoading(false)
     }
