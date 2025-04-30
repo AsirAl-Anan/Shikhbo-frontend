@@ -200,7 +200,7 @@ const Sidebar = ({ isSidebarOpen, isMobile, toggleSidebar, currentUser }) => {
               />
             </svg>
             <span className="flex items-center">
-              Exam Generator
+              New exam
               <span className="ml-2  px-1 py-0.5 rounded-sm bg-pink-500 text-white font-medium text-opacity-90 text-xs">soon</span>
             </span>
           </NavLink>
@@ -246,7 +246,7 @@ const Sidebar = ({ isSidebarOpen, isMobile, toggleSidebar, currentUser }) => {
               />
             </svg>
             <span className="flex items-center">
-              Inbox
+             Join study room
               <span className="ml-2  px-1 py-0.5 rounded-sm bg-pink-500 text-white font-medium text-opacity-90 text-xs">soon</span>
             </span>
           </NavLink>
