@@ -1,15 +1,7 @@
 import QuestionCard from "./QuestionCard"
 import { useState, useEffect } from "react"
 import instance from "../../utils/axios.js"
-const axios = instance
-export default function QuestionGrid({subjectName}) {
-  const [questions, setQuestions] = useState([])
-  const getQuestions = async () => {
-    
-    const res =await axios.get('/admin/cq')
-     setQuestions(res.data)import QuestionCard from "./QuestionCard"
-import { useState, useEffect } from "react"
-import instance from "../../utils/axios.js"
+
 const axios = instance
 
 export default function QuestionGrid({ subjectName }) {
@@ -20,7 +12,7 @@ export default function QuestionGrid({ subjectName }) {
   const getQuestions = async () => {
     try {
       setLoading(true)
-      const res = await axios.get('/admin/getCq', {
+      const res = await axios.get('/admin/cq', {
         params: { subjectName }
       })
       setQuestions(res.data || [])
@@ -51,21 +43,6 @@ export default function QuestionGrid({ subjectName }) {
           <QuestionCard key={question.id || question._id} question={question} />
         ))
       )}
-    </div>
-  )
-}
-
-     }
-     useEffect(() => {
-       getQuestions()
-     }, [])
-  
-
-  return (
-    <div className="">
-      {questions.map((question) => (
-        <QuestionCard key={question.id} question={question}  />
-      ))}
     </div>
   )
 }
