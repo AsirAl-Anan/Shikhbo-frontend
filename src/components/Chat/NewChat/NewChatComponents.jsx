@@ -1,5 +1,13 @@
 import React from "react";
 import { Image, Send } from "lucide-react";
+import ReactMarkdown from "react-markdown";
+import { InlineMath, BlockMath } from "react-katex";
+import "katex/dist/katex.min.css";
+import rehypeRaw from "rehype-raw";
+import remarkMath from "remark-math";
+import remarkGfm from "remark-gfm";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { dracula } from "react-syntax-highlighter/dist/esm/styles/prism";
 
 ////////// new chat components //////////
 export function ChatMessage({ message }) {
@@ -18,7 +26,53 @@ export function ChatMessage({ message }) {
           <div key={msg._id || msg.id || index} className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
             <div className={`max-w-[80%]`}>
               <div className={`rounded-lg p-3 ${isUser ? "bg-gray-700" : "bg-gray-800"}`}>
-                <p className="whitespace-pre-wrap">{messageText}</p>
+                <ReactMarkdown 
+                  className="whitespace-pre-wrap break-words"
+                  remarkPlugins={[remarkMath, remarkGfm]}
+                  rehypePlugins={[rehypeRaw]}
+                  components={{
+                    // Render inline math
+                    inlineMath: ({ value }) => <InlineMath math={value} />,
+                    
+                    // Render block math
+                    math: ({ value }) => <BlockMath math={value} />,
+                    
+                    // Render code blocks with syntax highlighting
+                    code: ({ node, className, children, ...props }) => {
+                      const match = /language-(\w+)/.exec(className || '');
+                      const language = match ? match[1] : 'text';
+                      
+                      if (language === 'math' || language === 'tex' || language === 'latex') {
+                        return <BlockMath math={String(children).replace(/\n$/, '')} />;
+                      }
+                      
+                      return (
+                        <SyntaxHighlighter
+                          style={dracula}
+                          language={language}
+                          PreTag="div"
+                          className="rounded-md text-sm overflow-auto my-2"
+                          {...props}
+                        >
+                          {String(children).replace(/\n$/, '')}
+                        </SyntaxHighlighter>
+                      );
+                    },
+                    
+                    // Style other elements
+                    h1: ({node, ...props}) => <h1 className="text-2xl font-bold my-4" {...props} />,
+                    h2: ({node, ...props}) => <h2 className="text-xl font-bold my-3" {...props} />,
+                    h3: ({node, ...props}) => <h3 className="text-lg font-bold my-2" {...props} />,
+                    ul: ({node, ...props}) => <ul className="list-disc ml-5 my-2" {...props} />,
+                    ol: ({node, ...props}) => <ol className="list-decimal ml-5 my-2" {...props} />,
+                    li: ({node, ...props}) => <li className="my-1" {...props} />,
+                    table: ({node, ...props}) => <div className="overflow-x-auto my-4"><table className="border-collapse table-auto w-full" {...props} /></div>,
+                    th: ({node, ...props}) => <th className="border border-gray-600 px-4 py-2 text-left" {...props} />,
+                    td: ({node, ...props}) => <td className="border border-gray-600 px-4 py-2" {...props} />
+                  }}
+                >
+                  {messageText}
+                </ReactMarkdown>
                 {msg.image && (
                   <img
                     src={msg.image || "/placeholder.svg"}
