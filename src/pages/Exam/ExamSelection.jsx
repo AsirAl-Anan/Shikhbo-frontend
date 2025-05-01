@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-
+import { NavLink } from "react-router-dom"
 const ExamSelectionPage = () => {
   // State for form fields
   const [subject, setSubject] = useState("")
@@ -12,14 +12,23 @@ const ExamSelectionPage = () => {
 
   // Subjects list
   const subjects = [
-    "Mathematics",
-    "Physics",
-    "Chemistry",
-    "Biology",
-    "Computer Science",
-    "English",
-    "History",
-    "Geography",
+   
+    "English 1st paper",
+    "English 2nd paper",
+    "Bangla 1st paper",
+    "Bangla 2nd paper",
+    "Physics 1st paper",
+    "Physics 2nd paper",
+    "chemistry 1st paper",
+    "chemistry 2nd paper",
+    "Higher Mathematics 1st paper",
+    "HigherNavLink Mathematics 2nd paper",
+    "Biology 1st paper ",
+    "Biology 2nd paper",
+   
+    
+    
+    
   ]
 
   // Calculate estimated time whenever question counts or exam type changes
