@@ -17,7 +17,10 @@ import Dashboard from './pages/Admin/AdminDashboard';
 import AddQuestion from './pages/Admin/AddQuestion';
 import AddSubject from './pages/Admin/AddSubject';
 import AcademicSection from './components/QBank/Subjects';
-
+//exam
+import ExamSelectionPage from './pages/Exam/ExamSelection';
+import ExamScreen from './pages/Exam/Exam';
+import ExamCompletion from './components/Exam/ExamCompletion';
 function App() {
   const { currentUser } = useContext(AuthContext);
 
@@ -31,6 +34,9 @@ function App() {
         { path: "/subjects", element: <AcademicSection /> },
         { path: "/:id", element: <NewChatPage /> },
         { path: "/subjects/:id", element: <StudyMaterialsPage /> }
+        { path: "/exam", element: <ExamSelectionPage /> }
+        { path: "/exam/:id", element: <ExamScreen /> }
+        { path: "/exam/complete/:id", element: <ExamScreen /> }
       ]
     },
     { path: "/auth", element: <AuthPage /> },
