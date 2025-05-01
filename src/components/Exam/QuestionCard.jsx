@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { X } from "lucide-react"
-import ColorSelector from "./ColorSelector"
-import QuickAddButton from "./QuickAddButton"
+
+
 import { NavLink } from "react-router-dom"
 
 export default function QuestionCard({ question }) {
