@@ -1,10 +1,9 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect } from "react"
 import { Outlet } from "react-router-dom"
 import Header from "../components/layout/Header"
 import Sidebar from "../components/layout/Sidebar"
-
 import { useContext } from "react"
 import { AuthContext } from "../context/UserContext"
 
@@ -12,13 +11,7 @@ const HomePage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isSidebarOpen, setSidebarOpen] = useState(true)
   const [isMobile, setIsMobile] = useState(false)
-  const {currentUser} = useContext(AuthContext)
-
-  useEffect(()=>{
-     if(!currentUser){
-       window.location.href = '/auth'
-     }
-   },[currentUser])
+  const { currentUser } = useContext(AuthContext)
 
   // Check screen size on mount and when resized
   useEffect(() => {
@@ -42,16 +35,9 @@ const HomePage = () => {
     return () => window.removeEventListener('resize', checkScreenSize)
   }, [])
 
-  useEffect(()=>{
-    if(currentUser === null){
-      window.location.href = "/auth"
-    }
-  },[currentUser])
-
   const toggleSidebar = () => {
     setSidebarOpen(!isSidebarOpen)
   }
-
 
   return (
     <div className="flex h-screen bg-black text-white overflow-hidden">
@@ -83,11 +69,7 @@ const HomePage = () => {
         <div className="flex-1 overflow-y-auto">
           <Outlet />
         </div>
-
-      
       </div>
-
-     
     </div>
   )
 }
