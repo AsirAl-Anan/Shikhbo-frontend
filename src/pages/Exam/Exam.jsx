@@ -7,7 +7,7 @@ import CircularTimer from "../../components/Exam/CircularTime"
 import QuestionCard from "../../components/Exam/QuestionCard"
 import DigitalTimer from "../../components/Exam/DigitalTImer"
 
-import ExamCompletion from "./ExamCompletion"
+import ExamCompletion from "../../components/Exam/ExamCompletion"
 
 // Sample exam data
 const examData = {
