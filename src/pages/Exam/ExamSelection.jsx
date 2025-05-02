@@ -5,7 +5,8 @@ import { NavLink } from "react-router-dom"
 
 import { useNavigate } from "react-router-dom"
 import instance from "../../utils/axios.js"
-const axios = instance
+import axios from "axios"
+
 const ExamSelectionPage = () => {
   // State for form fields
   const [subject, setSubject] = useState("")
@@ -65,7 +66,7 @@ const ExamSelectionPage = () => {
   // Handle form submission
   const handleSubmit = (e) => {
     e.preventDefault()
-   const exam = axios.post('/users/exam',{subject,examType,mcqCount,cqCount, examDuration})
+   const exam = axios.post('https://shikhbo-backend.onrender.com/api/users/exam',{subject,examType,mcqCount,cqCount, examDuration})
     console.log(exam)
     setExamId(exam.data.examId) //the response contains the exam ID
     //  navigate to the exam page and trigger the exam start
