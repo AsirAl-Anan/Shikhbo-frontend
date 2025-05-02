@@ -11,7 +11,7 @@ import {
   SettingsIcon,
   MenuIcon,
 } from "lucide-react"
-import { PulseLoader } from "react-spinners"
+import { HashLoader } from "react-spinners"
 import { useState, useEffect } from "react"
 
 const LoadingScreen = () => {
@@ -35,8 +35,8 @@ const LoadingScreen = () => {
       {/* Overlay with pulse loader */}
       <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
         <div className="flex flex-col items-center">
-          {/* PulseLoader from react-spinners */}
-          <PulseLoader color="#4ade80" size={15} margin={5} speedMultiplier={0.8} />
+          {/* Hahloader from react-spinners */}
+          <HashLoader  color="#4ade80" size={15} margin={5} speedMultiplier={0.8} />
 
           {/* Animated loading text */}
           <p className="mt-6 text-white font-medium min-w-[160px] text-center">{loadingText}</p>
