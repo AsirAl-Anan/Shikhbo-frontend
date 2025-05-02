@@ -99,7 +99,7 @@ const ExamScreen = () => {
     return <div className="min-h-screen bg-gray-900 text-gray-100 flex items-center justify-center">
       <div className="text-center">
         <h2 className="text-2xl font-bold text-red-500 mb-4">Exam Not Found</h2>
-        <p>Unable to load exam data. Please check the exam ID and try again.</p>
+        <p>Unable to load exam data. Not enough question in database.</p>
       </div>
     </div>
   }
