@@ -64,6 +64,7 @@ const ExamSelectionPage = () => {
   }
 const startExam = async ()=>{
   const exam = await axios.post('/users/exam', { subject, examType, mcqCount, cqCount, examDuration });
+  console.lof(exam)
 setExamId(exam?.data?.newExam?.examId) //the response contains the exam ID
 }
   // Handle form submission
