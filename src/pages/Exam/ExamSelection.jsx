@@ -66,8 +66,8 @@ const ExamSelectionPage = () => {
   // Handle form submission
   const handleSubmit = (e) => {
     e.preventDefault()
-   const exam = axios.post('https://shikhbo-backend.onrender.com/api/users/exam',{subject,examType,mcqCount,cqCount, examDuration})
-    console.log(exam)
+   const exam = axios.post('/users/exam', { subject, examType, mcqCount, cqCount, examDuration });
+
     setExamId(exam.data.examId) //the response contains the exam ID
     //  navigate to the exam page and trigger the exam start
     navigate(`/exam/${examId}`, {
