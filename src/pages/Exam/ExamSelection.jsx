@@ -66,6 +66,7 @@ const ExamSelectionPage = () => {
   const handleSubmit = (e) => {
     e.preventDefault()
    const exam = axios.post('/users/exam',{subject,examType,mcqCount,cqCount, examDuration})
+    console.log(exam)
     setExamId(exam.data.examId) //the response contains the exam ID
     //  navigate to the exam page and trigger the exam start
     navigate(`/exam/${examId}`, {
