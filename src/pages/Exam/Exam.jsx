@@ -58,7 +58,7 @@ const ExamScreen = () => {
       try {
         setIsLoading(true)
         const response = await axios.get(`/exam/${examId}`)
-        console.log("res',response)
+        console.log("res",response)
         setExamData(response.data)
         setTimeRemaining(response.data.duration)
       } catch (error) {
