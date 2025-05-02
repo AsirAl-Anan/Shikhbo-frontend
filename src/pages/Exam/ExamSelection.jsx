@@ -1,9 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { NavLink } from "react-router-dom"
-
-import { useNavigate } from "react-router-dom"
+import { NavLink, useNavigate } from "react-router-dom"
 import instance from "../../utils/axios.js"
 const axios = instance
 
@@ -14,11 +12,11 @@ const ExamSelectionPage = () => {
   const [mcqCount, setMcqCount] = useState(25)
   const [cqCount, setCqCount] = useState(8)
   const [examDuration, setExamDuration] = useState(0)
-  const [examId, setExamId] = useState("")
+  const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
+  
   // Subjects list
   const subjects = [
-   
     "English 1st paper",
     "English 2nd paper",
     "Bangla 1st paper",
@@ -31,10 +29,6 @@ const ExamSelectionPage = () => {
     "HigherNavLink Mathematics 2nd paper",
     "Biology 1st paper ",
     "Biology 2nd paper",
-   
-    
-    
-    
   ]
 
   // Calculate estimated time whenever question counts or exam type changes
@@ -62,28 +56,45 @@ const ExamSelectionPage = () => {
     }
     return `${mins} minute${mins > 1 ? "s" : ""}`
   }
-const startExam = async ()=>{
-  const exam = await axios.post('/users/exam', { subject, examType, mcqCount, cqCount, examDuration });
-  console.log(exam)
-setExamId(exam?.data?.data?._id) //the response contains the exam ID
-}
-  // Handle form submission
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    startExam()
-   console.log(examId)
-    
-  
-    navigate(`/exam/${examId}`, {
-      state: {
-        subject,
-        examType,
-        mcqCount,
-        cqCount,
-        examDuration,
-      },
-    })
 
+  // Handle form submission
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setLoading(true)
+    
+    try {
+      const exam = await axios.post('/users/exam', { 
+        subject, 
+        examType, 
+        mcqCount, 
+        cqCount, 
+        examDuration 
+      });
+      
+      console.log('Exam created:', exam.data);
+      const examId = exam?.data?.data?._id;
+      
+      if (examId) {
+        // Navigate to the exam page with the ID and state
+        navigate(`/exam/${examId}`, {
+          state: {
+            subject,
+            examType,
+            mcqCount,
+            cqCount,
+            examDuration,
+          },
+        });
+      } else {
+        console.error('No exam ID received from backend');
+        alert('Failed to create exam. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error creating exam:', error);
+      alert('Failed to create exam. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -217,14 +228,14 @@ setExamId(exam?.data?.data?._id) //the response contains the exam ID
               {/* Start Exam Button */}
               <button
                 type="submit"
-                disabled={!subject}
+                disabled={!subject || loading}
                 className={`mt-8 w-full py-3 px-4 rounded-lg font-medium transition-colors duration-200 ${
-                  subject
+                  subject && !loading
                     ? "bg-purple-600 hover:bg-purple-700 text-white"
                     : "bg-gray-700 text-gray-400 cursor-not-allowed"
                 }`}
               >
-                Start Exam
+                {loading ? "Creating Exam..." : "Start Exam"}
               </button>
             </form>
           </div>
