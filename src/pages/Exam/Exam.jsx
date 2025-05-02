@@ -72,8 +72,8 @@ const ExamScreen = () => {
     if (examId) {
       fetchExam()
     }
-  }, [examId])
-
+  }, [])
+console.log(examData)
   useEffect(() => {
     // Timer countdown
     if (timeRemaining > 0 && !isExamFinished) {
