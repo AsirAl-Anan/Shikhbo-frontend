@@ -8,45 +8,11 @@ import QuestionCard from "../../components/Exam/QuestionCard"
 import DigitalTimer from "../../components/Exam/DigitalTImer"
 import ExamCompletion from "../../components/Exam/ExamCompletion"
 const axios = instance
-// Sample exam data (fallback if API call fails)
-const sampleExamData = {
-  duration: 60 * 60, // 60 minutes in seconds
-  questions: [
-    {
-      id: 1,
-      stem: "What is the capital of France?",
-      a: { question: "London", explanation: "London is the capital of the United Kingdom, not France." },
-      b: { question: "Berlin", explanation: "Berlin is the capital of Germany, not France." },
-      c: { question: "Paris", explanation: "Correct! Paris is the capital of France." },
-      d: { question: "Madrid", explanation: "Madrid is the capital of Spain, not France." },
-      correctAnswer: "c",
-    },
-    {
-      id: 2,
-      stem: "Which of the following is NOT a programming language?",
-      a: { question: "Python", explanation: "Python is a popular programming language." },
-      b: { question: "Java", explanation: "Java is a widely used programming language." },
-      c: { question: "HTML", explanation: "Correct! HTML is a markup language, not a programming language." },
-      d: { question: "JavaScript", explanation: "JavaScript is a programming language used for web development." },
-      correctAnswer: "c",
-    },
-    {
-      id: 3,
-      stem: "What is the largest planet in our solar system?",
-      a: { question: "Earth", explanation: "Earth is the third planet from the Sun, not the largest." },
-      b: { question: "Jupiter", explanation: "Correct! Jupiter is the largest planet in our solar system." },
-      c: { question: "Saturn", explanation: "Saturn is the second-largest planet in our solar system." },
-      d: { question: "Mars", explanation: "Mars is smaller than Earth and not the largest planet." },
-      correctAnswer: "b",
-    },
-    // Add more questions as needed
-  ],
-}
 
 const ExamScreen = () => {
   const { examId } = useParams()
-  const [examData, setExamData] = useState([])
-  const [timeRemaining, setTimeRemaining] = useState(sampleExamData.duration)
+  const [examData, setExamData] = useState({})
+  const [timeRemaining, setTimeRemaining] = useState(0)
   const [isExamFinished, setIsExamFinished] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
   const [currentSolution, setCurrentSolution] = useState(null)
@@ -56,25 +22,35 @@ const ExamScreen = () => {
   useEffect(() => {
     const fetchExam = async () => {
       try {
+        console.log("Fetching exam with ID:", examId)
         setIsLoading(true)
         const response = await axios.get(`/exam/${examId}`)
-        console.log("res",response)
-        setExamData(response.data)
-        setTimeRemaining(response.data.duration)
+        console.log("Raw API Response:", response)
+        console.log("API Response data:", response.data)
+        
+        if (response.data) {
+          setExamData(response.data)
+          setTimeRemaining(response.data.duration)
+          console.log("ExamData set to:", response.data)
+        } else {
+          console.error("No data received from API")
+        }
       } catch (error) {
         console.error("Error fetching exam:", error)
-        // Fallback to sample data is already set as default state
+        console.error("Error details:", error.response || error.message || "Unknown error")
       } finally {
         setIsLoading(false)
       }
     }
 
     if (examId) {
-      console.log(true)
+      console.log("ExamID detected, triggering fetch:", examId)
       fetchExam()
+    } else {
+      console.log("No examId provided")
     }
-  }, [])
-console.log(examData)
+  }, [examId]) // Only depend on examId
+
   useEffect(() => {
     // Timer countdown
     if (timeRemaining > 0 && !isExamFinished) {
@@ -118,6 +94,15 @@ console.log(examData)
   if (isLoading) {
     return <div className="min-h-screen bg-gray-900 text-gray-100 flex items-center justify-center">Loading exam...</div>
   }
+  
+  if (!isLoading && (!examData || Object.keys(examData).length === 0)) {
+    return <div className="min-h-screen bg-gray-900 text-gray-100 flex items-center justify-center">
+      <div className="text-center">
+        <h2 className="text-2xl font-bold text-red-500 mb-4">Exam Not Found</h2>
+        <p>Unable to load exam data. Please check the exam ID and try again.</p>
+      </div>
+    </div>
+  }
 
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100">
@@ -153,13 +138,17 @@ console.log(examData)
           <div className="space-y-8">
             <h2 className="text-xl font-semibold mb-6">Answer all questions</h2>
 
-            {examData.questions.map((question) => (
-              <QuestionCard
-                key={question.id}
-                question={question}
-                onShowSolution={() => handleShowSolution(question.id)}
-              />
-            ))}
+            {examData.questions && examData.questions.length > 0 ? (
+              examData.questions.map((question) => (
+                <QuestionCard
+                  key={question.id}
+                  question={question}
+                  onShowSolution={() => handleShowSolution(question.id)}
+                />
+              ))
+            ) : (
+              <p className="text-yellow-400 p-4 bg-gray-800 rounded-lg">No questions available for this exam.</p>
+            )}
           </div>
         ) : (
           <ExamCompletion />
@@ -168,6 +157,31 @@ console.log(examData)
 
       {/* Solution Modal */}
       {currentSolution && <SolutionModal question={currentSolution} onClose={handleCloseSolution} />}
+    </div>
+  )
+}
+
+// Add the missing SolutionModal component
+const SolutionModal = ({ question, onClose }) => {
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+      <div className="bg-gray-800 p-6 rounded-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+        <h3 className="text-xl font-bold mb-4">Solution</h3>
+        <div className="mb-4">
+          <h4 className="font-semibold mb-2">Question:</h4>
+          <p>{question.text}</p>
+        </div>
+        <div className="mb-4">
+          <h4 className="font-semibold mb-2">Solution:</h4>
+          <p>{question.solution || "No solution provided"}</p>
+        </div>
+        <button
+          onClick={onClose}
+          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors duration-200"
+        >
+          Close
+        </button>
+      </div>
     </div>
   )
 }
