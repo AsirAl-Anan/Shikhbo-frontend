@@ -71,9 +71,9 @@ setExamId(exam?.data?.data?._id) //the response contains the exam ID
   const handleSubmit = (e) => {
     e.preventDefault()
     startExam()
-   
+   console.log(examId)
     
-    //  navigate to the exam page and trigger the exam start
+  
     navigate(`/exam/${examId}`, {
       state: {
         subject,
