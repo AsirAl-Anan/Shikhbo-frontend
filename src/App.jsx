@@ -65,7 +65,7 @@ function App() {
         { path: "/:id", element: <NewChatPage /> },
         { path: "/subjects/:id", element: <StudyMaterialsPage /> },
         { path: "/exam", element: <ExamSelectionPage /> },
-        { path: "/exam/:id", element: <ExamScreen /> },
+        { path: "/exam/:examId", element: <ExamScreen /> },
       
       ]
     },
