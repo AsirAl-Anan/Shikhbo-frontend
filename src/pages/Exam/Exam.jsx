@@ -1,16 +1,15 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-
+import { useParams } from "react-router-dom"
+import axios from "axios"
 import CircularTimer from "../../components/Exam/CircularTime"
-
 import QuestionCard from "../../components/Exam/QuestionCard"
-import DigitalTimer from "../../components/Exam/DigitalTImer"
-
+import DigitalTimer from "../../components/Exam/DigitalTimer"
 import ExamCompletion from "../../components/Exam/ExamCompletion"
 
-// Sample exam data
-const examData = {
+// Sample exam data (fallback if API call fails)
+const sampleExamData = {
   duration: 60 * 60, // 60 minutes in seconds
   questions: [
     {
@@ -45,11 +44,34 @@ const examData = {
 }
 
 const ExamScreen = () => {
-  const [timeRemaining, setTimeRemaining] = useState(examData.duration)
+  const { examId } = useParams()
+  const [examData, setExamData] = useState(sampleExamData)
+  const [timeRemaining, setTimeRemaining] = useState(sampleExamData.duration)
   const [isExamFinished, setIsExamFinished] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
   const [currentSolution, setCurrentSolution] = useState(null)
+  const [isLoading, setIsLoading] = useState(true)
   const headerRef = useRef(null)
+
+  useEffect(() => {
+    const fetchExam = async () => {
+      try {
+        setIsLoading(true)
+        const response = await axios.get(`/exam/${examId}`)
+        setExamData(response.data)
+        setTimeRemaining(response.data.duration)
+      } catch (error) {
+        console.error("Error fetching exam:", error)
+        // Fallback to sample data is already set as default state
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    if (examId) {
+      fetchExam()
+    }
+  }, [examId])
 
   useEffect(() => {
     // Timer countdown
@@ -89,6 +111,10 @@ const ExamScreen = () => {
 
   const handleCloseSolution = () => {
     setCurrentSolution(null)
+  }
+
+  if (isLoading) {
+    return <div className="min-h-screen bg-gray-900 text-gray-100 flex items-center justify-center">Loading exam...</div>
   }
 
   return (
@@ -139,7 +165,7 @@ const ExamScreen = () => {
       </main>
 
       {/* Solution Modal */}
-      {/* {currentSolution && <SolutionModal question={currentSolution} onClose={handleCloseSolution} />} */}
+      {currentSolution && <SolutionModal question={currentSolution} onClose={handleCloseSolution} />}
     </div>
   )
 }
