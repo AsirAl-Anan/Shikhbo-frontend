@@ -5,7 +5,7 @@ import { useParams } from "react-router-dom"
 import instance from "../../utils/axios.js"
 import CircularTimer from "../../components/Exam/CircularTime"
 import QuestionCard from "../../components/Exam/QuestionCard"
-import DigitalTimer from "../../components/Exam/DigitalTimer"
+import DigitalTimer from "../../components/Exam/DigitalTImer"
 import ExamCompletion from "../../components/Exam/ExamCompletion"
 const axios = instance
 // Sample exam data (fallback if API call fails)
