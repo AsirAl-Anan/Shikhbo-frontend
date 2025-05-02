@@ -2,12 +2,12 @@
 
 import { useState, useEffect, useRef } from "react"
 import { useParams } from "react-router-dom"
-import axios from "axios"
+import instance from "../../utils/axios.js"
 import CircularTimer from "../../components/Exam/CircularTime"
 import QuestionCard from "../../components/Exam/QuestionCard"
 import DigitalTimer from "../../components/Exam/DigitalTimer"
 import ExamCompletion from "../../components/Exam/ExamCompletion"
-
+const axios = instance
 // Sample exam data (fallback if API call fails)
 const sampleExamData = {
   duration: 60 * 60, // 60 minutes in seconds
@@ -58,6 +58,7 @@ const ExamScreen = () => {
       try {
         setIsLoading(true)
         const response = await axios.get(`/exam/${examId}`)
+        console.log(response)
         setExamData(response.data)
         setTimeRemaining(response.data.duration)
       } catch (error) {
