@@ -45,7 +45,7 @@ const sampleExamData = {
 
 const ExamScreen = () => {
   const { examId } = useParams()
-  const [examData, setExamData] = useState(sampleExamData)
+  const [examData, setExamData] = useState([])
   const [timeRemaining, setTimeRemaining] = useState(sampleExamData.duration)
   const [isExamFinished, setIsExamFinished] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
@@ -70,6 +70,7 @@ const ExamScreen = () => {
     }
 
     if (examId) {
+      console.log(true)
       fetchExam()
     }
   }, [])
