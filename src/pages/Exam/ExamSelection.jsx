@@ -2,14 +2,19 @@
 
 import { useState, useEffect } from "react"
 import { NavLink } from "react-router-dom"
+
+import { useNavigate } from "react-router-dom"
+import instance from "../../utils/axios.js"
+const axios = instance
 const ExamSelectionPage = () => {
   // State for form fields
   const [subject, setSubject] = useState("")
   const [examType, setExamType] = useState("mcq")
   const [mcqCount, setMcqCount] = useState(25)
   const [cqCount, setCqCount] = useState(8)
-  const [estimatedTime, setEstimatedTime] = useState(0)
-
+  const [examDuration, setExamDuration] = useState(0)
+  const [examId, setExamId] = useState("")
+  const navigate = useNavigate()
   // Subjects list
   const subjects = [
    
@@ -43,7 +48,7 @@ const ExamSelectionPage = () => {
       totalMinutes = mcqCount * 1 + cqCount * 20
     }
 
-    setEstimatedTime(totalMinutes)
+    setExamDuration(totalMinutes)
   }, [examType, mcqCount, cqCount])
 
   // Format time to hours and minutes
@@ -60,8 +65,19 @@ const ExamSelectionPage = () => {
   // Handle form submission
   const handleSubmit = (e) => {
     e.preventDefault()
-    alert(`Starting exam: ${subject}, Type: ${examType}, Time: ${formatTime(estimatedTime)}`)
-    // Here you would typically navigate to the exam page or trigger the exam start
+   const exam = axios.post('/users/exam',{subject,examType,mcqCount,cqCount, examDuration})
+    setExamId(exam.data.examId) //the response contains the exam ID
+    //  navigate to the exam page and trigger the exam start
+    navigate(`/exam/${examId}`, {
+      state: {
+        subject,
+        examType,
+        mcqCount,
+        cqCount,
+        examDuration,
+      },
+    })
+
   }
 
   return (
@@ -80,7 +96,7 @@ const ExamSelectionPage = () => {
                 <select
                   id="subject"
                   value={subject}
-                  onChange={(e) => setSubject(e.target.value)}
+                  onChange={(e) => setSubject(e.target.value.trim().toLowerCase())}
                   required
                   className="w-full bg-gray-700 border border-gray-600 rounded-lg py-2.5 px-4 text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                 >
@@ -181,12 +197,12 @@ const ExamSelectionPage = () => {
               <div className="mt-8 p-4 bg-gray-700 rounded-lg">
                 <div className="flex justify-between items-center">
                   <span className="text-sm font-medium text-gray-300">Estimated Time:</span>
-                  <span className="text-lg font-bold text-white">{formatTime(estimatedTime)}</span>
+                  <span className="text-lg font-bold text-white">{formatTime(examDuration)}</span>
                 </div>
                 <div className="mt-2 text-xs text-gray-400">
                   {examType === "both" && (
                     <p>
-                      Calculation: {mcqCount} MCQs × 1 min + {cqCount} CQs × 20 min = {estimatedTime} minutes
+                      Calculation: {mcqCount} MCQs × 1 min + {cqCount} CQs × 20 min = {examDuration} minutes
                     </p>
                   )}
                 </div>

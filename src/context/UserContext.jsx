@@ -12,8 +12,9 @@ import {
 } from "firebase/auth";
 import app from "../firebase/firebase.init.js";
 import instance from "../utils/axios.js";
-const axios = instance;
 
+const axios = instance;
+import LoadingScreen from "../components/LoadingScreen.jsx";
 // Create the authentication context
 export const AuthContext = createContext(null);
 
@@ -27,6 +28,7 @@ const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
   const [firebaseUser, setFirebaseUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [operationLoading, setOperationLoading] = useState(false);
   const [error, setError] = useState(null);
   
   const auth = getAuth(app);
@@ -35,8 +37,9 @@ const AuthProvider = ({ children }) => {
   const clearError = () => setError(null);
   
   // Create user with email and password
-  const createUserWithEmailAndPassword = async (email, password,username) => {
+  const createUserWithEmailAndPassword = async (email, password, username) => {
     clearError();
+    setOperationLoading(true);
     
     try {
       // Step 1: Create user in Firebase
@@ -77,12 +80,15 @@ const AuthProvider = ({ children }) => {
     } catch (err) {
       setError(err.message);
       throw err;
+    } finally {
+      setOperationLoading(false);
     }
   };
   
   // Sign in with email and password
   const signInWithEmailAndPassword = async (email, password) => {
     clearError();
+    setOperationLoading(true);
     
     try {
       // Step 1: Sign in with Firebase
@@ -110,12 +116,15 @@ const AuthProvider = ({ children }) => {
     } catch (err) {
       setError(err.message);
       throw err;
+    } finally {
+      setOperationLoading(false);
     }
   };
   
   // Sign up/in using Google popup
   const signupWithPopup = async (providerName = "google") => {
     clearError();
+    setOperationLoading(true);
     
     try {
       let authProvider;
@@ -167,6 +176,8 @@ const AuthProvider = ({ children }) => {
     } catch (err) {
       setError(err.message);
       throw err;
+    } finally {
+      setOperationLoading(false);
     }
   };
   
@@ -178,8 +189,11 @@ const AuthProvider = ({ children }) => {
   // Send email verification
   const sendEmailVerification = async () => {
     clearError();
+    setOperationLoading(true);
+    
     if (!auth.currentUser) {
       setError("No user is currently signed in");
+      setOperationLoading(false);
       throw new Error("No user is currently signed in");
     }
     
@@ -189,34 +203,44 @@ const AuthProvider = ({ children }) => {
     } catch (err) {
       setError(err.message);
       throw err;
+    } finally {
+      setOperationLoading(false);
     }
   };
   
   // Reset password
   const resetPassword = async (email) => {
     clearError();
+    setOperationLoading(true);
+    
     try {
       await sendPasswordResetEmail(auth, email);
       return true;
     } catch (err) {
       setError(err.message);
       throw err;
+    } finally {
+      setOperationLoading(false);
     }
   };
   
   // Logout user
   const logout = async () => {
     clearError();
+    setOperationLoading(true);
+    
     try {
       await signOut(auth);
-    const res =  await axios.post('/users/logout');
-    console.log(res)
+      const res = await axios.post('/users/logout');
+      console.log(res);
       setCurrentUser(null);
       setFirebaseUser(null);
       return true;
     } catch (err) {
       setError(err.message);
       throw err;
+    } finally {
+      setOperationLoading(false);
     }
   };
   
@@ -273,6 +297,7 @@ const AuthProvider = ({ children }) => {
     currentUser,
     firebaseUser, // Expose the firebaseUser for email verification checks
     loading,
+    operationLoading,
     error,
     clearError,
     createUserWithEmailAndPassword,
@@ -283,10 +308,17 @@ const AuthProvider = ({ children }) => {
     resetPassword,
     logout
   };
-  console.log(currentUser, "currentUser in context")
+  
+  console.log(currentUser, "currentUser in context");
+  
+  // Display loading screen when auth is initializing or when operations are in progress
+  if (loading || operationLoading) {
+    return <LoadingScreen />;
+  }
+  
   return (
     <AuthContext.Provider value={value}>
-      {!loading && children}
+      {children}
     </AuthContext.Provider>
   );
 };
