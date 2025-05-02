@@ -5,7 +5,7 @@ import { NavLink } from "react-router-dom"
 
 import { useNavigate } from "react-router-dom"
 import instance from "../../utils/axios.js"
-import axios from "axios"
+const axios = instance
 
 const ExamSelectionPage = () => {
   // State for form fields
