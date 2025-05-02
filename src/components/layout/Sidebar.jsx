@@ -184,7 +184,7 @@ const Sidebar = ({ isSidebarOpen, isMobile, toggleSidebar, currentUser }) => {
           </NavLink>
           
           {/* Exam Generator & Evaluator with Coming Soon Badge */}
-          <NavLink to={/exam}    className={ "flex items-center space-x-2 p-2 text-gray-300 hover:text-white hover:bg-gray-800 rounded-md"}>
+          <NavLink to={'/exam'}    className={ "flex items-center space-x-2 p-2 text-gray-300 hover:text-white hover:bg-gray-800 rounded-md"}>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className="h-5 w-5"
